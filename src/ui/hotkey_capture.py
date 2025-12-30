@@ -2,11 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from PyQt6.QtCore import QEvent, QObject, Qt, pyqtSignal
 from PyQt6.QtGui import QKeyEvent, QKeySequence
-
 
 _MODIFIER_KEYS = {
     Qt.Key.Key_Shift,
@@ -21,7 +18,7 @@ class HotkeyCaptureFilter(QObject):
 
     hotkey_captured = pyqtSignal(QKeySequence)
 
-    def __init__(self, parent: Optional[QObject] = None) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self._capturing = False
 
@@ -50,7 +47,7 @@ class HotkeyCaptureFilter(QObject):
         return True
 
     @staticmethod
-    def _sequence_from_event(event: QKeyEvent) -> Optional[QKeySequence]:
+    def _sequence_from_event(event: QKeyEvent) -> QKeySequence | None:
         key = event.key()
         if key in _MODIFIER_KEYS or key == Qt.Key.Key_unknown:
             return None

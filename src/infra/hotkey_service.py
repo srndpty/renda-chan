@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Optional
 
 try:  # pragma: no cover - optional dependency
     from pynput import keyboard as pynput_keyboard
@@ -36,8 +35,8 @@ class HotkeyService:
             raise RuntimeError("pynput または keyboard のいずれかをインストールしてください。")
         self._on_trigger = on_trigger
         self._backend = "pynput" if pynput_keyboard is not None else "keyboard"
-        self._listener: Optional[object] = None
-        self._keyboard_handle: Optional[int] = None
+        self._listener: object | None = None
+        self._keyboard_handle: int | None = None
 
     @property
     def backend_name(self) -> str:

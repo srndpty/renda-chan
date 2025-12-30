@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
 import json
 import logging
-from typing import Any, Mapping
+from collections.abc import Mapping
+from dataclasses import asdict
+from typing import Any
 
 from .config import AppConfig
 

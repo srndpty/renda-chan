@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from importlib import import_module, util
-from typing import Optional
 
 from PyQt6.QtCore import QObject, Qt, QThread, pyqtSignal, pyqtSlot
 
@@ -38,7 +37,7 @@ class ClickerWorker(QObject):
     stopped = pyqtSignal()
     error = pyqtSignal(str)
 
-    def __init__(self, backend: Optional[ClickBackend] = None) -> None:
+    def __init__(self, backend: ClickBackend | None = None) -> None:
         super().__init__()
         self._backend = backend or resolve_click_backend()
         self._loop = ClickLoop(self._backend)
@@ -74,7 +73,7 @@ class ClickerController(QObject):
     request_start = pyqtSignal(int)
     request_stop = pyqtSignal()
 
-    def __init__(self, backend: Optional[ClickBackend] = None) -> None:
+    def __init__(self, backend: ClickBackend | None = None) -> None:
         super().__init__()
         self._thread = QThread()
         self._worker = ClickerWorker(backend)
