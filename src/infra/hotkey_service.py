@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 try:  # pragma: no cover - optional dependency
     from pynput import keyboard as pynput_keyboard
@@ -13,6 +14,9 @@ try:  # pragma: no cover - optional dependency
     import keyboard as keyboard_module
 except ImportError:  # pragma: no cover - optional dependency
     keyboard_module = None
+
+if TYPE_CHECKING:
+    from pynput.keyboard import Listener
 
 
 _ESCAPE_TOKENS = {"esc", "escape"}
@@ -35,7 +39,7 @@ class HotkeyService:
             raise RuntimeError("pynput または keyboard のいずれかをインストールしてください。")
         self._on_trigger = on_trigger
         self._backend = "pynput" if pynput_keyboard is not None else "keyboard"
-        self._listener: object | None = None
+        self._listener: Listener | None = None
         self._keyboard_handle: int | None = None
 
     @property

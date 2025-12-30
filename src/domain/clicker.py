@@ -80,7 +80,7 @@ class ClickerController(QObject):
         self._worker.moveToThread(self._thread)
 
         self.request_start.connect(self._worker.start)
-        self.request_stop.connect(self._worker.stop, Qt.ConnectionType.DirectConnection)
+        self.request_stop.connect(self._worker.stop)
         self._worker.started.connect(self.started)
         self._worker.stopped.connect(self._handle_stopped)
         self._worker.error.connect(self.error)

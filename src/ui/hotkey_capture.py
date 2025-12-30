@@ -28,10 +28,10 @@ class HotkeyCaptureFilter(QObject):
     def stop(self) -> None:
         self._capturing = False
 
-    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+    def eventFilter(self, obj: QObject | None, event: QEvent | None) -> bool:
         if not self._capturing:
             return super().eventFilter(obj, event)
-        if event.type() != QEvent.Type.KeyPress:
+        if event is None or event.type() != QEvent.Type.KeyPress:
             return super().eventFilter(obj, event)
 
         key_event = event if isinstance(event, QKeyEvent) else None
