@@ -25,6 +25,7 @@ _STYLE_RUNNING: Final[str] = "color: #15803d; font-weight: 700;"
 _STYLE_STOPPED: Final[str] = "color: #b91c1c; font-weight: 700;"
 _STYLE_MUTED: Final[str] = "color: #6b7280;"
 
+
 class MainWindow(QMainWindow):
     """Compact main window for click interval configuration."""
 

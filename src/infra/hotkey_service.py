@@ -85,12 +85,7 @@ class HotkeyService:
 
 
 def _tokenize_hotkey(hotkey: str) -> list[str]:
-    normalized = (
-        hotkey.replace("⌘", "Meta")
-        .replace("⌥", "Alt")
-        .replace("⇧", "Shift")
-        .replace("⌃", "Ctrl")
-    )
+    normalized = hotkey.replace("⌘", "Meta").replace("⌥", "Alt").replace("⇧", "Shift").replace("⌃", "Ctrl")
     return [token.strip().lower() for token in normalized.replace("-", "+").split("+") if token.strip()]
 
 

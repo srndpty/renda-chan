@@ -26,9 +26,7 @@ class SettingsRepository:
 
     def load(self) -> AppSettings:
         """Load settings from persistent storage."""
-        interval_ms = self._settings.value(
-            self._INTERVAL_KEY, AppSettings.interval_ms, type=int
-        )
+        interval_ms = self._settings.value(self._INTERVAL_KEY, AppSettings.interval_ms, type=int)
         hotkey = self._settings.value(self._HOTKEY_KEY, "", type=str)
         if not isinstance(interval_ms, int) or interval_ms <= 0:
             interval_ms = AppSettings.interval_ms
