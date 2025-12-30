@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from typing import Final
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import (
     QApplication,
@@ -26,7 +26,9 @@ _STYLE_MUTED: Final[str] = "color: #6b7280;"
 class MainWindow(QMainWindow):
     """Compact main window for click interval configuration."""
 
-    def __init__(self) -> None:
+    hotkey_changed = pyqtSignal(str)
+
+    def __init__(self, settings_repo: SettingsRepository) -> None:
         super().__init__()
         self.setWindowTitle("renda-chan")
 
@@ -79,7 +81,7 @@ class MainWindow(QMainWindow):
 
         self._capturing_hotkey = False
         self.start_stop_hotkey = ""
-        self._settings_repo = SettingsRepository()
+        self._settings_repo = settings_repo
         self._hotkey_capture = HotkeyCaptureFilter(self)
         self._hotkey_capture.hotkey_captured.connect(self._handle_hotkey_captured)
         app = QApplication.instance()
@@ -140,6 +142,7 @@ class MainWindow(QMainWindow):
         self.set_hotkey_text(text)
         self._save_settings()
         self._stop_hotkey_capture()
+        self.hotkey_changed.emit(text)
 
     def _apply_settings(self, settings: AppSettings) -> None:
         self.interval_spin.setValue(settings.interval_ms)
@@ -151,6 +154,14 @@ class MainWindow(QMainWindow):
             interval_ms=self.interval_spin.value(),
             start_stop_hotkey=self.start_stop_hotkey,
         )
+
+    def current_interval_ms(self) -> int:
+        """Return the current click interval in milliseconds."""
+        return self.interval_spin.value()
+
+    def current_hotkey(self) -> str:
+        """Return the currently configured hotkey string."""
+        return self.start_stop_hotkey
 
     def _save_settings(self) -> None:
         self._settings_repo.save(self._current_settings())
