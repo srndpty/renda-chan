@@ -3,7 +3,9 @@
 from __future__ import annotations
 from typing import Final
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import (
+    QApplication,
     QFormLayout,
     QHBoxLayout,
     QLabel,
@@ -13,6 +15,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from .hotkey_capture import HotkeyCaptureFilter
 
 _STYLE_RUNNING: Final[str] = "color: #15803d; font-weight: 700;"
 _STYLE_STOPPED: Final[str] = "color: #b91c1c; font-weight: 700;"
@@ -40,6 +44,9 @@ class MainWindow(QMainWindow):
         self.hotkey_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.hotkey_label.setStyleSheet(_STYLE_MUTED)
         self.hotkey_button = QPushButton("設定")
+        self.hotkey_hint_label = QLabel()
+        self.hotkey_hint_label.setStyleSheet(_STYLE_MUTED)
+        self.hotkey_hint_label.setVisible(False)
 
         self.status_label = QLabel()
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
@@ -56,6 +63,7 @@ class MainWindow(QMainWindow):
         hotkey_row.addWidget(self.hotkey_label, 1)
         hotkey_row.addWidget(self.hotkey_button)
         form_layout.addRow("開始/停止ホットキー", hotkey_row)
+        form_layout.addRow("", self.hotkey_hint_label)
 
         status_row = QHBoxLayout()
         status_row.setContentsMargins(0, 0, 0, 0)
@@ -67,6 +75,16 @@ class MainWindow(QMainWindow):
         root_layout.setContentsMargins(8, 8, 8, 8)
         root_layout.setSpacing(6)
         root_layout.addLayout(form_layout)
+
+        self._capturing_hotkey = False
+        self.start_stop_hotkey = ""
+        self._hotkey_capture = HotkeyCaptureFilter(self)
+        self._hotkey_capture.hotkey_captured.connect(self._handle_hotkey_captured)
+        app = QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self._hotkey_capture)
+
+        self.hotkey_button.clicked.connect(self._toggle_hotkey_capture)
 
         self.set_running(False)
         self.adjustSize()
@@ -90,3 +108,29 @@ class MainWindow(QMainWindow):
             return
         self.hotkey_label.setText(text)
         self.hotkey_label.setStyleSheet("")
+
+    def _toggle_hotkey_capture(self) -> None:
+        if self._capturing_hotkey:
+            self._stop_hotkey_capture()
+            return
+        self._start_hotkey_capture()
+
+    def _start_hotkey_capture(self) -> None:
+        self._capturing_hotkey = True
+        self.hotkey_hint_label.setText("次のキー入力を割り当てます")
+        self.hotkey_hint_label.setVisible(True)
+        self.hotkey_button.setText("キャンセル")
+        self._hotkey_capture.start()
+
+    def _stop_hotkey_capture(self) -> None:
+        self._capturing_hotkey = False
+        self.hotkey_hint_label.setVisible(False)
+        self.hotkey_hint_label.setText("")
+        self.hotkey_button.setText("設定")
+        self._hotkey_capture.stop()
+
+    def _handle_hotkey_captured(self, sequence: QKeySequence) -> None:
+        text = sequence.toString(QKeySequence.SequenceFormat.NativeText)
+        self.start_stop_hotkey = text
+        self.set_hotkey_text(text)
+        self._stop_hotkey_capture()
