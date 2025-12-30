@@ -5,13 +5,13 @@ from __future__ import annotations
 import logging
 from typing import NamedTuple
 
-from .app import AppCoordinator
-from .config import AppConfig, load_config
-from .logging import configure_logging
 from ..domain.clicker import ClickerController
 from ..infra.hotkey_service import HotkeyService
 from ..infra.settings import SettingsRepository
 from ..ui.main_window import MainWindow
+from .app import AppCoordinator
+from .config import AppConfig, load_config
+from .logging import configure_logging
 
 
 class AppContainer(NamedTuple):

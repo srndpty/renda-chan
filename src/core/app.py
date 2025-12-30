@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from PyQt6.QtCore import QObject
 
@@ -20,7 +19,7 @@ class AppCoordinator(QObject):
         window: MainWindow,
         clicker: ClickerController,
         hotkey_service: HotkeyService,
-        logger: Optional[logging.Logger] = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         super().__init__()
         self._window = window

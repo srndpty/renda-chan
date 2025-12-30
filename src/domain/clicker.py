@@ -2,20 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from importlib import import_module, util
-import threading
-from typing import Callable, Optional
 
-from PyQt6.QtCore import QObject, Qt, QThread, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 
-
-@dataclass(frozen=True)
-class ClickBackend:
-    """Callable wrapper for executing a click action."""
-
-    click: Callable[[], None]
-    name: str
+from .clicker_loop import ClickBackend, ClickLoop
 
 
 def resolve_click_backend() -> ClickBackend:
@@ -46,10 +37,10 @@ class ClickerWorker(QObject):
     stopped = pyqtSignal()
     error = pyqtSignal(str)
 
-    def __init__(self, backend: Optional[ClickBackend] = None) -> None:
+    def __init__(self, backend: ClickBackend | None = None) -> None:
         super().__init__()
         self._backend = backend or resolve_click_backend()
-        self._stop_event = threading.Event()
+        self._loop = ClickLoop(self._backend)
 
     @pyqtSlot(int)
     def start(self, interval_ms: int) -> None:
@@ -58,14 +49,9 @@ class ClickerWorker(QObject):
             self.error.emit("クリック間隔は 1ms 以上を指定してください。")
             return
 
-        self._stop_event.clear()
         self.started.emit(interval_ms, self._backend.name)
         try:
-            interval_s = interval_ms / 1000.0
-            while not self._stop_event.is_set():
-                self._backend.click()
-                if self._stop_event.wait(interval_s):
-                    break
+            self._loop.run(interval_ms)
         except Exception as exc:  # pragma: no cover - depends on backend
             self.error.emit(str(exc))
         finally:
@@ -74,7 +60,7 @@ class ClickerWorker(QObject):
     @pyqtSlot()
     def stop(self) -> None:
         """Request the click loop to stop."""
-        self._stop_event.set()
+        self._loop.stop()
 
 
 class ClickerController(QObject):
@@ -87,14 +73,14 @@ class ClickerController(QObject):
     request_start = pyqtSignal(int)
     request_stop = pyqtSignal()
 
-    def __init__(self, backend: Optional[ClickBackend] = None) -> None:
+    def __init__(self, backend: ClickBackend | None = None) -> None:
         super().__init__()
         self._thread = QThread()
         self._worker = ClickerWorker(backend)
         self._worker.moveToThread(self._thread)
 
         self.request_start.connect(self._worker.start)
-        self.request_stop.connect(self._worker.stop, Qt.ConnectionType.DirectConnection)
+        self.request_stop.connect(self._worker.stop)
         self._worker.started.connect(self.started)
         self._worker.stopped.connect(self._handle_stopped)
         self._worker.error.connect(self.error)

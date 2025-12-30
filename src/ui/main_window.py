@@ -1,7 +1,9 @@
 """Main application window UI."""
 
 from __future__ import annotations
+
 from typing import Final
+
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import (
@@ -22,6 +24,7 @@ from .hotkey_capture import HotkeyCaptureFilter
 _STYLE_RUNNING: Final[str] = "color: #15803d; font-weight: 700;"
 _STYLE_STOPPED: Final[str] = "color: #b91c1c; font-weight: 700;"
 _STYLE_MUTED: Final[str] = "color: #6b7280;"
+
 
 class MainWindow(QMainWindow):
     """Compact main window for click interval configuration."""
