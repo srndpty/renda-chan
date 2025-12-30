@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-import os
-import sys
 import threading
-
-# Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 import pytest
 
-from src.domain.clicker_loop import ClickBackend, ClickLoop
+from ..domain.clicker_loop import ClickBackend, ClickLoop
 
 
 def test_click_loop_runs_until_wait_requests_stop() -> None:

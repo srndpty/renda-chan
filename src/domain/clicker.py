@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from importlib import import_module, util
 
-from PyQt6.QtCore import QObject, Qt, QThread, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 
 from .clicker_loop import ClickBackend, ClickLoop
 
