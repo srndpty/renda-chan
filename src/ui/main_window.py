@@ -16,6 +16,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from ..infra.settings import AppSettings, SettingsRepository
 from .hotkey_capture import HotkeyCaptureFilter
 
 _STYLE_RUNNING: Final[str] = "color: #15803d; font-weight: 700;"
@@ -78,13 +79,17 @@ class MainWindow(QMainWindow):
 
         self._capturing_hotkey = False
         self.start_stop_hotkey = ""
+        self._settings_repo = SettingsRepository()
         self._hotkey_capture = HotkeyCaptureFilter(self)
         self._hotkey_capture.hotkey_captured.connect(self._handle_hotkey_captured)
         app = QApplication.instance()
         if app is not None:
             app.installEventFilter(self._hotkey_capture)
 
+        self._apply_settings(self._settings_repo.load())
+
         self.hotkey_button.clicked.connect(self._toggle_hotkey_capture)
+        self.interval_spin.valueChanged.connect(self._handle_interval_changed)
 
         self.set_running(False)
         self.adjustSize()
@@ -133,4 +138,23 @@ class MainWindow(QMainWindow):
         text = sequence.toString(QKeySequence.SequenceFormat.NativeText)
         self.start_stop_hotkey = text
         self.set_hotkey_text(text)
+        self._save_settings()
         self._stop_hotkey_capture()
+
+    def _apply_settings(self, settings: AppSettings) -> None:
+        self.interval_spin.setValue(settings.interval_ms)
+        self.start_stop_hotkey = settings.start_stop_hotkey
+        self.set_hotkey_text(settings.start_stop_hotkey)
+
+    def _current_settings(self) -> AppSettings:
+        return AppSettings(
+            interval_ms=self.interval_spin.value(),
+            start_stop_hotkey=self.start_stop_hotkey,
+        )
+
+    def _save_settings(self) -> None:
+        self._settings_repo.save(self._current_settings())
+
+    def _handle_interval_changed(self, value: int) -> None:
+        _ = value
+        self._save_settings()
